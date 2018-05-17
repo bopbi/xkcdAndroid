@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import com.arjunalabs.android.xkcdreader.R
 import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import com.squareup.picasso.Picasso
@@ -18,7 +19,10 @@ import com.uber.autodispose.kotlin.autoDisposable
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: MainViewModel
+    private lateinit var imageView: ImageView
+    private lateinit var prevButton: Button
+    private lateinit var nextButton: Button
 
     private val scopeProvider by lazy { AndroidLifecycleScopeProvider.from(this) }
 
@@ -29,9 +33,9 @@ class MainActivity : AppCompatActivity() {
         val xkcdService = XKCDService.create()
         val getLatestComic = GetLatestComic(xkcdService)
         val getComicByNumber = GetComicByNumber(xkcdService)
-        val imageView = findViewById<ImageView>(R.id.imageview_main)
-        val prevButton = findViewById<Button>(R.id.button_prev)
-        val nextButton = findViewById<Button>(R.id.button_next)
+        imageView = findViewById<ImageView>(R.id.imageview_main)
+        prevButton = findViewById<Button>(R.id.button_prev)
+        nextButton = findViewById<Button>(R.id.button_next)
         viewModel = ViewModelProviders
                 .of(this, MainViewModelFactory(getComicByNumber, getLatestComic))
                 .get(MainViewModel::class.java)
@@ -55,16 +59,20 @@ class MainActivity : AppCompatActivity() {
                     if (!it.isInitialized) {
                         viewModel.loadLatest()
                     } else {
-
-                        prevButton.isEnabled = it.prevButtonEnabled
-                        nextButton.isEnabled = it.nextButtonEnabled
-
-                        it.data?.let {
-                            Picasso.get().load(it.img).into(imageView)
-                        }
-
+                        render(it)
                     }
                 }
     }
 
+    private fun render(mainActivityState: MainActivityState) {
+
+        mainActivityState.let {
+            prevButton.isEnabled = it.prevButtonEnabled
+            nextButton.isEnabled = it.nextButtonEnabled
+
+            it.data?.let {
+                Picasso.get().load(it.img).into(imageView)
+            }
+        }
+    }
 }
