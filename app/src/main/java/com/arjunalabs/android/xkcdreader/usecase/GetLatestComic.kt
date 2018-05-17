@@ -1,8 +1,8 @@
 package com.arjunalabs.android.xkcdreader.usecase
 
-import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.repository.XkcdData
+import io.reactivex.Observable
 
-class GetLatestComic(private val xkcdService: XKCDService) {
-
-    fun execute() = xkcdService.getLatestComic()
+interface GetLatestComic {
+    fun execute() : Observable<XkcdData>
 }

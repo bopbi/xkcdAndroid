@@ -9,8 +9,8 @@ import android.widget.ImageView
 import com.arjunalabs.android.xkcdreader.R
 import com.arjunalabs.android.xkcdreader.repository.XKCDService
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
-import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
-import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
+import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumberImpl
+import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicImpl
 import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val xkcdService = XKCDService.create()
-        val getLatestComic = GetLatestComic(xkcdService)
-        val getComicByNumber = GetComicByNumber(xkcdService)
+        val getLatestComic = GetLatestComicImpl(xkcdService)
+        val getComicByNumber = GetComicByNumberImpl(xkcdService)
         imageView = findViewById(R.id.imageview_main)
         prevButton = findViewById(R.id.button_prev)
         nextButton = findViewById(R.id.button_next)

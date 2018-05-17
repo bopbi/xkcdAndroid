@@ -1,8 +1,9 @@
 package com.arjunalabs.android.xkcdreader.usecase
 
-import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.repository.XkcdData
+import io.reactivex.Observable
 
-class GetComicByNumber(private val xkcdService: XKCDService) {
+interface GetComicByNumber {
 
-    fun execute(numberString: String) = xkcdService.getComicByNumber(numberString)
+    fun execute(numberString: String) : Observable<XkcdData>
 }
