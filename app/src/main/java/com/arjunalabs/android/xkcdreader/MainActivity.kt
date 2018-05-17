@@ -3,7 +3,6 @@ package com.arjunalabs.android.xkcdreader
 import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -26,12 +25,13 @@ class MainActivity : AppCompatActivity() {
                 .subscribe {
                     Log.v(">XKCD APP", it.toString())
                     title = it.data?.title ?: ""
+
+                    if (!it.isInitialized) {
+                        viewModel.loadLatest()
+                    }
                 }
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadIfNotInitialized()
-    }
+
 }
