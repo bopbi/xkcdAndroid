@@ -20,6 +20,7 @@ class MainViewModel(
     private val behaviorSubject = BehaviorSubject.create<MainActivityState>()
     private var currentState = MainActivityState()
     private val compositeDisposable = CompositeDisposable()
+    private var latestNum: Int = 0
 
     init {
         behaviorSubject.onNext(currentState)
@@ -30,8 +31,9 @@ class MainViewModel(
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
                 .subscribe {
-                    currentState = MainActivityState(true, it)
+                    currentState = MainActivityState(true, nextButtonEnabled = false, prevButtonEnabled = true, data = it)
                     // add reducer here
+                    latestNum = it.num
 
             behaviorSubject.onNext(currentState)
         })
@@ -42,8 +44,22 @@ class MainViewModel(
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
                 .subscribe {
-                    currentState = MainActivityState(true, it)
+                    currentState = MainActivityState(true, data = it)
                     // add reducer here
+                    when (it.num) {
+                        latestNum -> {
+                            currentState.prevButtonEnabled = true
+                            currentState.nextButtonEnabled = false
+                        }
+                        0 -> {
+                            currentState.prevButtonEnabled = false
+                            currentState.nextButtonEnabled = true
+                        }
+                        else -> {
+                            currentState.prevButtonEnabled = true
+                            currentState.nextButtonEnabled = true
+                        }
+                    }
 
                     behaviorSubject.onNext(currentState)
                 })
