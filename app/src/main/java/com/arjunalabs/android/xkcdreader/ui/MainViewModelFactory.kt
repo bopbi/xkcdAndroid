@@ -1,7 +1,9 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.ui
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
+import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
+import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 
 class MainViewModelFactory(private val getComicByNumber: GetComicByNumber, private val getLatestComic: GetLatestComic) : ViewModelProvider.Factory {
 

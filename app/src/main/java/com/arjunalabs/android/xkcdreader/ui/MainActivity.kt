@@ -1,9 +1,13 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.ui
 
 import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.arjunalabs.android.xkcdreader.R
+import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
+import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -30,8 +34,6 @@ class MainActivity : AppCompatActivity() {
                         viewModel.loadLatest()
                     }
                 }
-
     }
-
 
 }

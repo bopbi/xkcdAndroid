@@ -1,4 +1,4 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.repository
 
 import io.reactivex.Observable
 import retrofit2.Retrofit

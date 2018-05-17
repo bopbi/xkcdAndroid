@@ -1,4 +1,6 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.usecase
+
+import com.arjunalabs.android.xkcdreader.repository.XKCDService
 
 class GetComicByNumber(private val xkcdService: XKCDService) {
 

@@ -1,6 +1,9 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.ui
 
 import android.arch.lifecycle.ViewModel
+import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
+import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
+import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers

@@ -1,4 +1,4 @@
-package com.arjunalabs.android.xkcdreader
+package com.arjunalabs.android.xkcdreader.repository
 
 data class XkcdData(
         val month : Int,
