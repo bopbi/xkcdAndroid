@@ -33,9 +33,9 @@ class MainActivity : AppCompatActivity() {
         val xkcdService = XKCDService.create()
         val getLatestComic = GetLatestComic(xkcdService)
         val getComicByNumber = GetComicByNumber(xkcdService)
-        imageView = findViewById<ImageView>(R.id.imageview_main)
-        prevButton = findViewById<Button>(R.id.button_prev)
-        nextButton = findViewById<Button>(R.id.button_next)
+        imageView = findViewById(R.id.imageview_main)
+        prevButton = findViewById(R.id.button_prev)
+        nextButton = findViewById(R.id.button_next)
         viewModel = ViewModelProviders
                 .of(this, MainViewModelFactory(getComicByNumber, getLatestComic))
                 .get(MainViewModel::class.java)
