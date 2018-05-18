@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import com.arjunalabs.android.xkcdreader.R
 import com.arjunalabs.android.xkcdreader.repository.XKCDService
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
@@ -54,24 +55,35 @@ class MainActivity : AppCompatActivity() {
                 .autoDisposable(scopeProvider)
                 .subscribe {
                     Log.v(">XKCD APP", it.toString())
-                    title = it.data?.title ?: ""
 
-                    if (!it.isInitialized) {
-                        viewModel.loadLatest()
-                    } else {
-                        render(it)
-                    }
+                    render(it)
                 }
     }
 
     private fun render(mainActivityState: MainActivityState) {
 
         mainActivityState.let {
-            prevButton.isEnabled = it.prevButtonEnabled
-            nextButton.isEnabled = it.nextButtonEnabled
 
-            it.data?.let {
-                Picasso.get().load(it.img).into(imageView)
+            when (it) {
+                is  MainActivityState.Error -> {
+                    Toast.makeText(this@MainActivity, it.errorString, Toast.LENGTH_LONG).show()
+                }
+
+                is MainActivityState.Loading -> {
+                    Toast.makeText(this@MainActivity, "Loading", Toast.LENGTH_LONG).show()
+                }
+
+                is MainActivityState.Data -> {
+                    prevButton.isEnabled = it.prevButtonEnabled
+                    nextButton.isEnabled = it.nextButtonEnabled
+                    Picasso.get().load(it.data.img).into(imageView)
+                }
+
+                is MainActivityState.Uninitialized -> {
+                    viewModel.loadLatest()
+                    prevButton.isEnabled = false
+                    nextButton.isEnabled = false
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.arjunalabs.android.xkcdreader.ui
 import android.arch.lifecycle.ViewModel
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
+import com.arjunalabs.android.xkcdreader.usecase.GetComicResult
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import io.reactivex.Observable
 import io.reactivex.Scheduler
@@ -18,24 +19,33 @@ class MainViewModel(
         private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel() {
 
     private val behaviorSubject = BehaviorSubject.create<MainActivityState>()
-    private var currentState = MainActivityState()
     private val compositeDisposable = CompositeDisposable()
     private var latestNum: Int = 0
+    private var currentNum: Int = 0
 
     init {
-        behaviorSubject.onNext(currentState)
+        behaviorSubject.onNext(MainActivityState.Uninitialized)
     }
 
     fun loadLatest() {
         compositeDisposable.add(getLatestComic.execute()
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
+                .map {
+                    when (it) {
+                        is GetComicResult.Error -> MainActivityState.Error("error")
+                        is GetComicResult.Loading -> MainActivityState.Loading
+                        is GetComicResult.Success -> MainActivityState.Data(it.data, prevButtonEnabled = true)
+                    }
+                }
                 .subscribe {
-                    currentState = MainActivityState(true, nextButtonEnabled = false, prevButtonEnabled = true, data = it)
                     // add reducer here
-                    latestNum = it.num
+                    if (it is MainActivityState.Data) {
+                        latestNum = it.data.num
+                        currentNum = latestNum
+                    }
 
-            behaviorSubject.onNext(currentState)
+            behaviorSubject.onNext(it)
         })
     }
 
@@ -43,40 +53,47 @@ class MainViewModel(
         compositeDisposable.add(getComicByNumber.execute(numberString)
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
-                .subscribe {
-                    currentState = MainActivityState(true, data = it)
-                    // add reducer here
-                    when (it.num) {
-                        latestNum -> {
-                            currentState.prevButtonEnabled = true
-                            currentState.nextButtonEnabled = false
-                        }
-                        0 -> {
-                            currentState.prevButtonEnabled = false
-                            currentState.nextButtonEnabled = true
-                        }
-                        else -> {
-                            currentState.prevButtonEnabled = true
-                            currentState.nextButtonEnabled = true
+                .map {
+                    when (it) {
+                        is GetComicResult.Error -> MainActivityState.Error("error")
+                        is GetComicResult.Loading -> MainActivityState.Loading
+                        is GetComicResult.Success -> {
+                            val state = MainActivityState.Data(it.data)
+                            when (it.data.num) {
+                                latestNum -> {
+                                    state.prevButtonEnabled = true
+                                    state.nextButtonEnabled = false
+
+                                }
+                                0 -> {
+                                    state.prevButtonEnabled = false
+                                    state.nextButtonEnabled = true
+                                }
+                                else -> {
+                                    state.prevButtonEnabled = true
+                                    state.nextButtonEnabled = true
+                                }
+                            }
+                            state
                         }
                     }
-
-                    behaviorSubject.onNext(currentState)
+                }
+                .subscribe {
+                    if (it is MainActivityState.Data) {
+                        currentNum = it.data.num
+                    }
+                    behaviorSubject.onNext(it)
                 })
     }
 
     fun nextComic() {
-        currentState.data?.let {
-            val index = it.num + 1
-            getComicByNumber(index.toString())
-        }
+        val index = currentNum + 1
+        getComicByNumber(index.toString())
     }
 
     fun prevComic() {
-        currentState.data?.let {
-            val index = it.num - 1
-            getComicByNumber(index.toString())
-        }
+        val index = currentNum - 1
+        getComicByNumber(index.toString())
     }
 
     fun getState() : Observable<MainActivityState> = behaviorSubject
