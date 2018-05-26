@@ -9,5 +9,5 @@ class GetComicByNumberImpl(private val xkcdService: XKCDService) : GetComicByNum
     override fun execute(numberString: String): Observable<GetComicResult> = xkcdService.getComicByNumber(numberString)
             .map<GetComicResult>{ Success(it) }
             .startWith(Loading) // if this change to lambda the emit not work https://stackoverflow.com/questions/49602609/nothing-executes-after-startwith-operator-in-rxjava
-            .onErrorReturn { Error("") }
+            .onErrorResumeNext(Observable.just(Error("")))
 }

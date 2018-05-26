@@ -5,6 +5,7 @@ import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetComicResult
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
+import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicResult
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -33,9 +34,9 @@ class MainViewModel(
                 .observeOn(observerSchedulers)
                 .map {
                     when (it) {
-                        is GetComicResult.Error -> MainActivityState.Error("error")
-                        is GetComicResult.Loading -> MainActivityState.Loading
-                        is GetComicResult.Success -> MainActivityState.Data(it.data, prevButtonEnabled = true)
+                        is GetLatestComicResult.Error -> MainActivityState.Error("error")
+                        is GetLatestComicResult.Loading -> MainActivityState.Loading
+                        is GetLatestComicResult.Success -> MainActivityState.Data(it.data, prevButtonEnabled = true)
                     }
                 }
                 .subscribe {
@@ -63,7 +64,6 @@ class MainViewModel(
                                 latestNum -> {
                                     state.prevButtonEnabled = true
                                     state.nextButtonEnabled = false
-
                                 }
                                 0 -> {
                                     state.prevButtonEnabled = false

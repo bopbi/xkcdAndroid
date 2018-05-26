@@ -3,5 +3,5 @@ package com.arjunalabs.android.xkcdreader.usecase
 import io.reactivex.Observable
 
 interface GetLatestComic {
-    fun execute() : Observable<GetComicResult>
+    fun execute() : Observable<GetLatestComicResult>
 }
