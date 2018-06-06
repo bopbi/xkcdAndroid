@@ -58,7 +58,6 @@ dependencies {
     // optional - Test helpers for LiveData
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
 
-
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
@@ -70,4 +69,7 @@ dependencies {
     implementation 'com.uber.autodispose:autodispose-kotlin:0.8.0'
     implementation 'com.uber.autodispose:autodispose-android-kotlin:0.8.0'
     implementation 'com.uber.autodispose:autodispose-android-archcomponents-kotlin:0.8.0'
+
+    // add mockito kotlin
+    testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
 }
