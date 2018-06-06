@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             viewModel.nextComic()
         }
 
-        viewModel.getState()
+        viewModel.getObservableState()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .autoDisposable(scopeProvider)

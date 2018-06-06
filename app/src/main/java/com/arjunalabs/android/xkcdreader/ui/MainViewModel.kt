@@ -17,7 +17,8 @@ class MainViewModel(
         private val getComicByNumber: GetComicByNumber,
         private val getLatestComic: GetLatestComic,
         private val subscriberSchedulers: Scheduler = Schedulers.io(),
-        private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel() {
+        private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel(),
+        StateObservable<MainActivityState> {
 
     private val behaviorSubject = BehaviorSubject.create<MainActivityState>()
     private val compositeDisposable = CompositeDisposable()
@@ -36,7 +37,8 @@ class MainViewModel(
                     when (it) {
                         is GetLatestComicResult.Error -> MainActivityState.Error("error")
                         is GetLatestComicResult.Loading -> MainActivityState.Loading
-                        is GetLatestComicResult.Success -> MainActivityState.Data(it.data, prevButtonEnabled = true)
+                        is GetLatestComicResult.Success -> MainActivityState.Data(it.data,
+                                prevButtonEnabled = true)
                     }
                 }
                 .subscribe {
@@ -46,11 +48,11 @@ class MainViewModel(
                         currentNum = latestNum
                     }
 
-            behaviorSubject.onNext(it)
-        })
+                    behaviorSubject.onNext(it)
+                })
     }
 
-    private fun getComicByNumber(numberString : String) {
+    private fun getComicByNumber(numberString: String) {
         compositeDisposable.add(getComicByNumber.execute(numberString)
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
@@ -96,7 +98,7 @@ class MainViewModel(
         getComicByNumber(index.toString())
     }
 
-    fun getState() : Observable<MainActivityState> = behaviorSubject
+    override fun getObservableState(): Observable<MainActivityState> = behaviorSubject
 
     override fun onCleared() {
         super.onCleared()
