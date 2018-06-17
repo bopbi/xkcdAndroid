@@ -3,11 +3,12 @@ package com.arjunalabs.android.xkcdreader.ui.state
 import com.arjunalabs.android.xkcdreader.repository.XkcdData
 
 data class MainActivityState(
-        var loading: Boolean,
-        var error: Boolean,
-        var uninitialized: Boolean,
-        var data: XkcdData?,
-        var prevButtonEnabled: Boolean = false,
-        var nextButtonEnabled: Boolean = false
+        val loading: Boolean,
+        val error: Boolean,
+        val uninitialized: Boolean,
+        val data: XkcdData?,
+        val prevButtonEnabled: Boolean = false,
+        val nextButtonEnabled: Boolean = false,
+        val currentNum: Int,
+        val latestNum: Int
 )
-

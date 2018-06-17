@@ -20,8 +20,6 @@ class MainViewModel(
         private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
-    private var latestNum: Int = 0
-    private var currentNum: Int = 0
 
     private val state: MutableLiveData<MainActivityState> = MutableLiveData()
 
@@ -35,7 +33,9 @@ class MainViewModel(
                 error = false,
                 data = null,
                 prevButtonEnabled = false,
-                nextButtonEnabled = false
+                nextButtonEnabled = false,
+                currentNum = -1,
+                latestNum = -1
         )
     }
 
@@ -44,30 +44,48 @@ class MainViewModel(
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
                 .subscribe {
-                    val newState = state.value
+                    val currentState = state.value
                     val result = it
-                    newState?.let {
-                        newState.uninitialized = false
+                    currentState?.let {
                         when (result) {
                             is GetLatestComicResult.Error -> {
-                                newState.error = true
+                                state.value = MainActivityState(
+                                        loading = currentState.loading,
+                                        uninitialized = false,
+                                        error = true,
+                                        data = currentState.data,
+                                        prevButtonEnabled = currentState.prevButtonEnabled,
+                                        nextButtonEnabled = currentState.nextButtonEnabled,
+                                        currentNum = currentState.currentNum,
+                                        latestNum = currentState.latestNum
+                                )
                             }
                             is GetLatestComicResult.Loading -> {
-                                newState.loading = true
+                                state.value = MainActivityState(
+                                        loading = true,
+                                        uninitialized = false,
+                                        error = false,
+                                        data = currentState.data,
+                                        prevButtonEnabled = currentState.prevButtonEnabled,
+                                        nextButtonEnabled = currentState.nextButtonEnabled,
+                                        currentNum = currentState.currentNum,
+                                        latestNum = currentState.latestNum
+                                )
                             }
                             is GetLatestComicResult.Success -> {
-                                newState.data = result.data
-                                newState.loading = false
-
-                                latestNum = result.data.num
-                                currentNum = latestNum
-
-                                newState.prevButtonEnabled = true
-                                newState.nextButtonEnabled = false
+                                state.value = MainActivityState(
+                                        loading = false,
+                                        uninitialized = false,
+                                        error = false,
+                                        data = result.data,
+                                        prevButtonEnabled = true,
+                                        nextButtonEnabled = false,
+                                        currentNum = result.data.num,
+                                        latestNum = result.data.num
+                                )
                             }
                         }
 
-                        state.value = newState
                     }
                 })
     }
@@ -77,52 +95,89 @@ class MainViewModel(
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
                 .subscribe {
-                    val newState = state.value
+                    val currentState = state.value
                     val result = it
-                    newState?.let {
-                        newState.uninitialized = false
+                    currentState?.let {
                         when (result) {
                             is GetComicResult.Error -> {
-                                newState.error = true
+                                state.value = MainActivityState(
+                                        loading = currentState.loading,
+                                        uninitialized = false,
+                                        error = true,
+                                        data = currentState.data,
+                                        prevButtonEnabled = currentState.prevButtonEnabled,
+                                        nextButtonEnabled = currentState.nextButtonEnabled,
+                                        currentNum = currentState.currentNum,
+                                        latestNum = currentState.latestNum
+                                )
                             }
                             is GetComicResult.Loading -> {
-                                newState.loading = true
+                                state.value = MainActivityState(
+                                        loading = true,
+                                        uninitialized = false,
+                                        error = false,
+                                        data = currentState.data,
+                                        prevButtonEnabled = currentState.prevButtonEnabled,
+                                        nextButtonEnabled = currentState.nextButtonEnabled,
+                                        currentNum = currentState.currentNum,
+                                        latestNum = currentState.latestNum
+                                )
                             }
                             is GetComicResult.Success -> {
-                                newState.data = result.data
-                                newState.loading = false
 
-                                currentNum = result.data?.num
-                                when (currentNum) {
-                                    latestNum -> {
-                                        newState.prevButtonEnabled = true
-                                        newState.nextButtonEnabled = false
+                                val prevButtonEnabled = when (result.data.num) {
+                                    (state.value?.latestNum ?: -1) -> {
+                                        true
                                     }
                                     0 -> {
-                                        newState.prevButtonEnabled = false
-                                        newState.nextButtonEnabled = true
+                                        false
                                     }
                                     else -> {
-                                        newState.prevButtonEnabled = true
-                                        newState.nextButtonEnabled = true
+                                        true
                                     }
                                 }
+
+                                val nextButtonEnabled = when (result.data.num) {
+                                    (state.value?.latestNum ?: -1) -> {
+                                        false
+                                    }
+                                    0 -> {
+                                        true
+                                    }
+                                    else -> {
+                                        true
+                                    }
+                                }
+
+                                state.value = MainActivityState(
+                                        loading = false,
+                                        uninitialized = false,
+                                        error = false,
+                                        data = result.data,
+                                        prevButtonEnabled = prevButtonEnabled,
+                                        nextButtonEnabled = nextButtonEnabled,
+                                        currentNum = result.data.num,
+                                        latestNum = state.value?.latestNum ?: -1
+                                )
                             }
                         }
-                        state.value = newState
                     }
 
                 })
     }
 
     fun nextComic() {
-        val index = currentNum + 1
-        getComicByNumber(index.toString())
+        state.value?.let {
+            val index = it.currentNum + 1
+            getComicByNumber(index.toString())
+        }
     }
 
     fun prevComic() {
-        val index = currentNum - 1
-        getComicByNumber(index.toString())
+        state.value?.let {
+            val index = it.currentNum - 1
+            getComicByNumber(index.toString())
+        }
     }
 
     override fun onCleared() {
