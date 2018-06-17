@@ -25,6 +25,11 @@ android {
     packagingOptions {
       exclude 'META-INF/rxjava.properties'
     }
+
+    dataBinding {
+        enabled = true
+    }
+
 }
 
 dependencies {
@@ -56,7 +61,11 @@ dependencies {
     implementation "android.arch.lifecycle:reactivestreams:$lifecycle_version"
 
     // optional - Test helpers for LiveData
-    testImplementation "android.arch.core:core-testing:$lifecycle_version"
+    testImplementation ("android.arch.core:core-testing:$lifecycle_version", {
+      exclude group: 'com.android.support', module: 'support-compat'
+      exclude group: 'com.android.support', module: 'support-annotations'
+      exclude group: 'com.android.support', module: 'support-core-utils'
+    })
 
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
@@ -65,10 +74,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
 
     implementation 'com.squareup.picasso:picasso:2.71828'
-
-    implementation 'com.uber.autodispose:autodispose-kotlin:0.8.0'
-    implementation 'com.uber.autodispose:autodispose-android-kotlin:0.8.0'
-    implementation 'com.uber.autodispose:autodispose-android-archcomponents-kotlin:0.8.0'
 
     // add mockito kotlin
     testImplementation "com.nhaarman:mockito-kotlin:1.5.0"

@@ -1,5 +1,6 @@
 package com.arjunalabs.android.xkcdreader.ui
 
+import android.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arjunalabs.android.xkcdreader.repository.XkcdData
 import com.arjunalabs.android.xkcdreader.ui.MainViewModel
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
@@ -15,14 +16,20 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 
 class MainViewModelTest {
+
+    @Rule
+    @JvmField
+    val rule: TestRule = InstantTaskExecutorRule()
 
     private val getComicByNumber: GetComicByNumber = mock()
     private val getLatestComic: GetLatestComic = mock()
     private val scheduler = Schedulers.trampoline()
-    private val viewModel = MainViewModel(getComicByNumber, getLatestComic, scheduler, scheduler)
+    private val viewModel by lazy { MainViewModel(getComicByNumber, getLatestComic, scheduler, scheduler) }
     private val dataResult = XkcdData(
             month = 1,
             num = 3,
@@ -48,12 +55,15 @@ class MainViewModelTest {
         whenever(getLatestComic.execute())
                 .thenReturn(Observable.just(GetLatestComicResult.Error("")))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.loadLatest()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] is MainActivityState.Error)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertTrue(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -62,12 +72,15 @@ class MainViewModelTest {
         whenever(getLatestComic.execute())
                 .thenReturn(Observable.just(GetLatestComicResult.Loading))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.loadLatest()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] === MainActivityState.Loading)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertTrue(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -76,12 +89,15 @@ class MainViewModelTest {
         whenever(getLatestComic.execute())
                 .thenReturn(Observable.just(GetLatestComicResult.Success(dataResult)))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.loadLatest()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertEquals(testSubscriber.values()[1], MainActivityState.Data(dataResult, true, false))
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNotNull(viewModel.appState.value!!.data)
+        Assert.assertTrue(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -90,12 +106,15 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Error("")))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.nextComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] is MainActivityState.Error)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertTrue(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -104,12 +123,15 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Loading))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.nextComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] === MainActivityState.Loading)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertTrue(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -118,12 +140,15 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Success(dataResult)))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.nextComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertEquals(testSubscriber.values()[1], MainActivityState.Data(dataResult, true, true))
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNotNull(viewModel.appState.value!!.data)
+        Assert.assertTrue(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertTrue(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -132,12 +157,15 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Error("")))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.prevComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] is MainActivityState.Error)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertTrue(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -146,12 +174,15 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Loading))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.prevComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertTrue(testSubscriber.values()[1] === MainActivityState.Loading)
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertTrue(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNull(viewModel.appState.value!!.data)
+        Assert.assertFalse(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertFalse(viewModel.appState.value!!.nextButtonEnabled)
     }
 
     @Test
@@ -160,11 +191,14 @@ class MainViewModelTest {
         whenever(getComicByNumber.execute(any()))
                 .thenReturn(Observable.just(GetComicResult.Success(dataResult)))
 
-        val testSubscriber = viewModel.getObservableState().test()
-
         viewModel.prevComic()
 
-        Assert.assertTrue(testSubscriber.values()[0] === MainActivityState.Uninitialized)
-        Assert.assertEquals(testSubscriber.values()[1], MainActivityState.Data(dataResult, true, true))
+        Assert.assertNotNull(viewModel.appState.value)
+        Assert.assertFalse(viewModel.appState.value!!.uninitialized)
+        Assert.assertFalse(viewModel.appState.value!!.loading)
+        Assert.assertFalse(viewModel.appState.value!!.error)
+        Assert.assertNotNull(viewModel.appState.value!!.data)
+        Assert.assertTrue(viewModel.appState.value!!.prevButtonEnabled)
+        Assert.assertTrue(viewModel.appState.value!!.nextButtonEnabled)
     }
 }

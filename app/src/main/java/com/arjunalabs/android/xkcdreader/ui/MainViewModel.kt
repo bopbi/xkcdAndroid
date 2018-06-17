@@ -1,54 +1,74 @@
 package com.arjunalabs.android.xkcdreader.ui
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetComicResult
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicResult
-import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 
 class MainViewModel(
         private val getComicByNumber: GetComicByNumber,
         private val getLatestComic: GetLatestComic,
         private val subscriberSchedulers: Scheduler = Schedulers.io(),
-        private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel(),
-        StateObservable<MainActivityState> {
+        private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()) : ViewModel() {
 
-    private val behaviorSubject = BehaviorSubject.create<MainActivityState>()
     private val compositeDisposable = CompositeDisposable()
     private var latestNum: Int = 0
     private var currentNum: Int = 0
 
+    private val state: MutableLiveData<MainActivityState> = MutableLiveData()
+
+    val appState: LiveData<MainActivityState>
+        get() = state
+
     init {
-        behaviorSubject.onNext(MainActivityState.Uninitialized)
+        state.value = MainActivityState(
+                loading = false,
+                uninitialized = true,
+                error = false,
+                data = null,
+                prevButtonEnabled = false,
+                nextButtonEnabled = false
+        )
     }
 
-    fun loadLatest() {
+   fun loadLatest() {
         compositeDisposable.add(getLatestComic.execute()
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
-                .map {
-                    when (it) {
-                        is GetLatestComicResult.Error -> MainActivityState.Error("error")
-                        is GetLatestComicResult.Loading -> MainActivityState.Loading
-                        is GetLatestComicResult.Success -> MainActivityState.Data(it.data,
-                                prevButtonEnabled = true)
-                    }
-                }
                 .subscribe {
-                    // add reducer here
-                    if (it is MainActivityState.Data) {
-                        latestNum = it.data.num
-                        currentNum = latestNum
-                    }
+                    val newState = state.value
+                    val result = it
+                    newState?.let {
+                        newState.uninitialized = false
+                        when (result) {
+                            is GetLatestComicResult.Error -> {
+                                newState.error = true
+                            }
+                            is GetLatestComicResult.Loading -> {
+                                newState.loading = true
+                            }
+                            is GetLatestComicResult.Success -> {
+                                newState.data = result.data
+                                newState.loading = false
 
-                    behaviorSubject.onNext(it)
+                                latestNum = result.data.num
+                                currentNum = latestNum
+
+                                newState.prevButtonEnabled = true
+                                newState.nextButtonEnabled = false
+                            }
+                        }
+
+                        state.value = newState
+                    }
                 })
     }
 
@@ -56,35 +76,42 @@ class MainViewModel(
         compositeDisposable.add(getComicByNumber.execute(numberString)
                 .subscribeOn(subscriberSchedulers)
                 .observeOn(observerSchedulers)
-                .map {
-                    when (it) {
-                        is GetComicResult.Error -> MainActivityState.Error("error")
-                        is GetComicResult.Loading -> MainActivityState.Loading
-                        is GetComicResult.Success -> {
-                            val state = MainActivityState.Data(it.data)
-                            when (it.data.num) {
-                                latestNum -> {
-                                    state.prevButtonEnabled = true
-                                    state.nextButtonEnabled = false
-                                }
-                                0 -> {
-                                    state.prevButtonEnabled = false
-                                    state.nextButtonEnabled = true
-                                }
-                                else -> {
-                                    state.prevButtonEnabled = true
-                                    state.nextButtonEnabled = true
+                .subscribe {
+                    val newState = state.value
+                    val result = it
+                    newState?.let {
+                        newState.uninitialized = false
+                        when (result) {
+                            is GetComicResult.Error -> {
+                                newState.error = true
+                            }
+                            is GetComicResult.Loading -> {
+                                newState.loading = true
+                            }
+                            is GetComicResult.Success -> {
+                                newState.data = result.data
+                                newState.loading = false
+
+                                currentNum = result.data?.num
+                                when (currentNum) {
+                                    latestNum -> {
+                                        newState.prevButtonEnabled = true
+                                        newState.nextButtonEnabled = false
+                                    }
+                                    0 -> {
+                                        newState.prevButtonEnabled = false
+                                        newState.nextButtonEnabled = true
+                                    }
+                                    else -> {
+                                        newState.prevButtonEnabled = true
+                                        newState.nextButtonEnabled = true
+                                    }
                                 }
                             }
-                            state
                         }
+                        state.value = newState
                     }
-                }
-                .subscribe {
-                    if (it is MainActivityState.Data) {
-                        currentNum = it.data.num
-                    }
-                    behaviorSubject.onNext(it)
+
                 })
     }
 
@@ -97,8 +124,6 @@ class MainViewModel(
         val index = currentNum - 1
         getComicByNumber(index.toString())
     }
-
-    override fun getObservableState(): Observable<MainActivityState> = behaviorSubject
 
     override fun onCleared() {
         super.onCleared()
