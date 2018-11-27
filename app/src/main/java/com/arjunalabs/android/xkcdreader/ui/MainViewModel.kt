@@ -1,6 +1,6 @@
 package com.arjunalabs.android.xkcdreader.ui
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetComicResult

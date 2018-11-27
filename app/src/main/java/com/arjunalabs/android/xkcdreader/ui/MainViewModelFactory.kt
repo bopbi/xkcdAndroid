@@ -1,7 +1,7 @@
 package com.arjunalabs.android.xkcdreader.ui
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 
