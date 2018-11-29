@@ -1,22 +1,24 @@
 package com.arjunalabs.android.xkcdreader.ui
 
-import androidx.lifecycle.ViewModelProviders
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
+import com.arjunalabs.android.xkcdreader.MyApplication
 import com.arjunalabs.android.xkcdreader.R
 import com.arjunalabs.android.xkcdreader.repository.XKCDService
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumberImpl
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicImpl
 import com.squareup.picasso.Picasso
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import com.uber.autodispose.kotlin.autoDisposable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,13 +27,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
 
+    @Inject
+    lateinit var xkcdService: XKCDService
+
     private val scopeProvider by lazy { AndroidLifecycleScopeProvider.from(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val xkcdService = XKCDService.create()
+        (application as MyApplication).myApplicationComponent.inject(this)
+
         val getLatestComic = GetLatestComicImpl(xkcdService)
         val getComicByNumber = GetComicByNumberImpl(xkcdService)
         imageView = findViewById(R.id.imageview_main)
