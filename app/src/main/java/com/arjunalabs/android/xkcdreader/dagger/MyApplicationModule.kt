@@ -1,16 +1,17 @@
 package com.arjunalabs.android.xkcdreader.dagger
 
 import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.repository.XKCDServiceImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-class MyApplicationModule {
+open class MyApplicationModule {
 
     @Provides
     @Singleton
-    fun provideXKCDService(): XKCDService {
-        return XKCDService.create()
+    open fun provideXKCDService(): XKCDService {
+        return XKCDServiceImpl.create()
     }
 }
