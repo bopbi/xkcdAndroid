@@ -70,9 +70,13 @@ dependencies {
     // add mockito kotlin
     testImplementation "com.nhaarman:mockito-kotlin:1.6.0"
 
-    // gradle 2
-    implementation 'com.google.dagger:dagger:2.19'
-    kapt 'com.google.dagger:dagger-compiler:2.19'
+    // Dagger -> kept at 2.16 because https://github.com/google/dagger/issues/1245
+    final DAGGER_VERSION = "2.16"
+    implementation "com.google.dagger:dagger:$DAGGER_VERSION"
+    kapt "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+    implementation "com.google.dagger:dagger-android:$DAGGER_VERSION"
+    implementation "com.google.dagger:dagger-android-support:$DAGGER_VERSION"
+    kapt "com.google.dagger:dagger-android-processor:$DAGGER_VERSION"
 
     // instrument test
     androidTestImplementation 'androidx.test:runner:1.1.0'
@@ -81,7 +85,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:truth:1.0.0'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation "com.nhaarman:mockito-kotlin:1.6.0"
-    androidTestImplementation 'org.mockito:mockito-android:2.19.0'
+    androidTestImplementation 'org.mockito:mockito-android:2.23.4'
 
     // dagger mock
     testImplementation 'com.github.fabioCollini.daggermock:daggermock:0.8.4'

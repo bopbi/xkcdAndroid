@@ -7,44 +7,40 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
-import com.arjunalabs.android.xkcdreader.MyApplication
 import com.arjunalabs.android.xkcdreader.R
-import com.arjunalabs.android.xkcdreader.repository.XKCDService
+import com.arjunalabs.android.xkcdreader.dagger.ViewModelFactory
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
-import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumberImpl
-import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicImpl
 import com.squareup.picasso.Picasso
 import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import com.uber.autodispose.kotlin.autoDisposable
+import dagger.android.AndroidInjection
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var vmFactory: ViewModelFactory<MainViewModel>
+
     private lateinit var viewModel: MainViewModel
     private lateinit var imageView: ImageView
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
 
-    @Inject
-    lateinit var xkcdService: XKCDService
-
     private val scopeProvider by lazy { AndroidLifecycleScopeProvider.from(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        (application as MyApplication).myApplicationComponent.inject(this)
-
-        val getLatestComic = GetLatestComicImpl(xkcdService)
-        val getComicByNumber = GetComicByNumberImpl(xkcdService)
         imageView = findViewById(R.id.imageview_main)
         prevButton = findViewById(R.id.button_prev)
         nextButton = findViewById(R.id.button_next)
+
         viewModel = ViewModelProviders
-                .of(this, MainViewModelFactory(getComicByNumber, getLatestComic))
+                .of(this, vmFactory)
                 .get(MainViewModel::class.java)
 
         prevButton.setOnClickListener {
@@ -71,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         mainActivityState.let {
 
             when (it) {
-                is  MainActivityState.Error -> {
+                is MainActivityState.Error -> {
                     Toast.makeText(this@MainActivity, it.errorString, Toast.LENGTH_LONG).show()
                 }
 
