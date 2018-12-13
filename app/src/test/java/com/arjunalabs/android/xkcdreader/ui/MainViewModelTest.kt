@@ -1,7 +1,6 @@
 package com.arjunalabs.android.xkcdreader.ui
 
 import com.arjunalabs.android.xkcdreader.repository.XkcdData
-import com.arjunalabs.android.xkcdreader.ui.MainViewModel
 import com.arjunalabs.android.xkcdreader.ui.state.MainActivityState
 import com.arjunalabs.android.xkcdreader.usecase.GetComicByNumber
 import com.arjunalabs.android.xkcdreader.usecase.GetComicResult

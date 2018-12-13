@@ -1,13 +1,25 @@
 package com.arjunalabs.android.xkcdreader.dagger
 
-import com.arjunalabs.android.xkcdreader.ui.MainActivity
+import android.content.Context
+import com.arjunalabs.android.xkcdreader.MyApplication
+import dagger.BindsInstance
 import dagger.Component
+import dagger.android.AndroidInjectionModule
+import dagger.android.AndroidInjector
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [MyApplicationModule::class])
+@Component(modules = [
+    AndroidInjectionModule::class,
+    MyApplicationModule::class,
+    MainViewModelModule::class
+])
 
-interface MyApplicationComponent {
+interface MyApplicationComponent : AndroidInjector<MyApplication> {
 
-    fun inject(mainActivity: MainActivity)
+    @Component.Builder
+    abstract class Builder : AndroidInjector.Builder<MyApplication>() {
+        @BindsInstance
+        abstract fun appContext(appContext: Context): Builder
+    }
 }
