@@ -8,19 +8,18 @@ import com.arjunalabs.android.xkcdreader.usecase.GetLatestComic
 import com.arjunalabs.android.xkcdreader.usecase.GetLatestComicResult
 import io.reactivex.Observable
 import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
+import javax.inject.Named
 
 class MainViewModel @Inject constructor(
         private val getComicByNumber: GetComicByNumber,
-        private val getLatestComic: GetLatestComic
+        private val getLatestComic: GetLatestComic,
+        @Named("schedulersIo") private val subscriberSchedulers: Scheduler,
+        @Named("schedulersMainThread")private val observerSchedulers: Scheduler
 ) : ViewModel(), StateObservable<MainActivityState> {
 
-    private val subscriberSchedulers: Scheduler = Schedulers.io()
-    private val observerSchedulers: Scheduler = AndroidSchedulers.mainThread()
     private val behaviorSubject = BehaviorSubject.create<MainActivityState>()
     private val compositeDisposable = CompositeDisposable()
     private var latestNum: Int = 0
